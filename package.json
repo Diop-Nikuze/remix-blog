@@ -34,8 +34,10 @@
     "@remix-run/react": "^1.6.7",
     "@remix-run/serve": "^1.6.7",
     "@remix-run/server-runtime": "^1.6.7",
+    "@types/marked": "^4.0.3",
     "bcryptjs": "^2.4.3",
     "isbot": "^3.5.0",
+    "marked": "^4.0.18",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "tiny-invariant": "^1.2.0"
@@ -83,6 +85,6 @@
     "node": ">=14"
   },
   "prisma": {
-    "seed": "node --require tsconfig-paths/register prisma/seed.js"
+    "seed": "ts-node prisma/seed.ts"
   }
 }
