@@ -2,8 +2,17 @@ import { Form, useActionData } from "@remix-run/react";
 import { redirect, json } from "@remix-run/node";
 import type { ActionFunction } from "@remix-run/node";
 import { createPost } from "~/models/posts.server";
+import invariant from "tiny-invariant";
 
 const inputClassName = `w-full rounded border border-gray-500 px-2 py-1 text-lg`;
+
+type ActionData =
+  | {
+      title: null | string;
+      slug: null | string;
+      markdown: null | string;
+    }
+  | undefined;
 
 export const action: ActionFunction = async ({ request }) => {
   const formData = await request.formData();
@@ -12,14 +21,18 @@ export const action: ActionFunction = async ({ request }) => {
   const slug = formData.get("slug");
   const markdown = formData.get("markdown");
 
-  const errors = {
+  const errors: ActionData = {
     title: title ? null : "Title is required",
     slug: slug ? null : "Slug is required",
-    markdown: markdown ? null : "Title is required",
+    markdown: markdown ? null : "Markdown is required",
   };
 
   const hasErros = Object.values(errors).some((errorMessage) => errorMessage);
-  if (hasErros) return json(errors);
+  if (hasErros) return json<ActionData>(errors);
+
+  invariant(typeof title === "string", "title must be a string");
+  invariant(typeof slug === "string", "slug must be a string");
+  invariant(typeof markdown === "string", "markdown must be a string");
 
   await createPost({ title, slug, markdown });
 
@@ -27,7 +40,7 @@ export const action: ActionFunction = async ({ request }) => {
 };
 
 export default function NewPostRoute() {
-  const errors = useActionData();
+  const errors = useActionData() as ActionData;
   return (
     <Form method="post">
       <p>
@@ -42,11 +55,19 @@ export default function NewPostRoute() {
       <p>
         <label>
           Post Slug:{" "}
+          {errors?.slug ? (
+            <em className="text-red-600">{errors.slug}</em>
+          ) : null}
           <input type="text" name="slug" className={inputClassName} />
         </label>
       </p>
       <p>
-        <label htmlFor="markdown">Markdown:</label>
+        <label htmlFor="markdown">
+          Markdown:{" "}
+          {errors?.markdown ? (
+            <em className="text-red-600">{errors.markdown}</em>
+          ) : null}
+        </label>
         <br />
         <textarea
           id="markdown"
